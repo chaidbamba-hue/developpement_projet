@@ -1,0 +1,340 @@
+<?php
+//session_start();
+require_once "database/database.php";
+
+function formatMoney($amount) {
+    return number_format(floatval($amount ?? 0), 0, ',', ' ') . ' FCFA';
+}
+
+// === SUPPRESSION ===
+if (isset($_GET['delete'])) {
+    try {
+        $stmt = $pdo->prepare("DELETE FROM reservations WHERE numero_reservation = ?");
+        $stmt->execute([$_GET['delete']]);
+        $_SESSION['message'] = "Réservation supprimée avec succès.";
+    } catch (Exception $e) {
+        $_SESSION['message'] = "Erreur : " . $e->getMessage();
+    }
+}
+
+// === AJOUT / MODIFICATION ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action         = $_POST['action'] ?? '';
+    $numero         = trim($_POST['numero_reservation'] ?? '');
+    $date_res       = $_POST['date_reservation'] ?? '';
+    $heure_res      = $_POST['heure_reservation'] ?? '';
+    $date_debut     = $_POST['date_debut'] ?? '';
+    $date_fin       = $_POST['date_fin'] ?? '';
+    $type_res       = trim($_POST['type_reservation'] ?? '');
+    $code_chambre   = $_POST['code_chambre'] ?? '';
+    $code_client    = $_POST['code_client'] ?? '';
+    $code_facture   = $_POST['code_facture'] ?? '';
+    $duree_jours    = (int)($_POST['duree_jours'] ?? 0);
+    $prix_chambre   = floatval($_POST['prix_chambre'] ?? 0);
+    $montant_res    = $duree_jours * $prix_chambre; // Calcul auto
+    $statut_res     = $_POST['statut_reservation'] ?? 'réservé';
+    $observation    = trim($_POST['observation_reservation'] ?? '');
+    $etat_res       = $_POST['etat_reservation'] ?? 'actif';
+
+    try {
+        if ($action === 'add') {
+            $sql = "INSERT INTO reservations 
+                    (numero_reservation, date_reservation, heure_reservation, date_debut, date_fin,
+                     type_reservation, code_chambre, code_client, code_facture,
+                     duree_jours, prix_chambre, montant_reservation, statut_reservation,
+                     observation_reservation, etat_reservation)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            $pdo->prepare($sql)->execute([
+                $numero, $date_res, $heure_res, $date_debut, $date_fin,
+                $type_res, $code_chambre, $code_client, $code_facture,
+                $duree_jours, $prix_chambre, $montant_res, $statut_res,
+                $observation, $etat_res
+            ]);
+            $_SESSION['message'] = "Réservation ajoutée avec succès.";
+        }
+
+        if ($action === 'update') {
+            $sql = "UPDATE reservations SET
+                    date_reservation=?, heure_reservation=?, date_debut=?, date_fin=?,
+                    type_reservation=?, code_chambre=?, code_client=?, code_facture=?,
+                    duree_jours=?, prix_chambre=?, montant_reservation=?, statut_reservation=?,
+                    observation_reservation=?, etat_reservation=?
+                    WHERE numero_reservation=?";
+            $pdo->prepare($sql)->execute([
+                $date_res, $heure_res, $date_debut, $date_fin,
+                $type_res, $code_chambre, $code_client, $code_facture,
+                $duree_jours, $prix_chambre, $montant_res, $statut_res,
+                $observation, $etat_res, $numero
+            ]);
+            $_SESSION['message'] = "Réservation modifiée avec succès.";
+        }
+    } catch (PDOException $e) {
+        if ($e->getCode() == 23000) {
+            $_SESSION['message'] = "Erreur : Ce numéro de réservation existe déjà !";
+        } else {
+            $_SESSION['message'] = "Erreur : " . $e->getMessage();
+        }
+    }
+}
+
+// === CHARGEMENT DONNÉES ===
+$reservations = $pdo->query("
+    SELECT r.*, cl.nom_prenom_client, ch.nom_chambre, h.nom_hotel, f.titre_facture
+    FROM reservations r
+    LEFT JOIN clients cl ON r.code_client = cl.code_client
+    LEFT JOIN chambres ch ON r.code_chambre = ch.code_chambre
+    LEFT JOIN hotels h ON ch.code_hotel = h.code_hotel
+    LEFT JOIN factures f ON r.code_facture = f.code_facture
+    ORDER BY r.date_reservation DESC
+")->fetchAll();
+
+$clients  = $pdo->query("SELECT code_client, nom_prenom_client FROM clients ORDER BY nom_prenom_client")->fetchAll();
+$chambres = $pdo->query("SELECT code_chambre, nom_chambre FROM chambres ORDER BY nom_chambre")->fetchAll();
+$factures = $pdo->query("SELECT code_facture, titre_facture FROM factures ORDER BY titre_facture")->fetchAll();
+
+$message = $_SESSION['message'] ?? '';
+$alert_type = str_starts_with($message, 'Erreur') ? 'danger' : 'success';
+if ($message) unset($_SESSION['message']);
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Soutra+ | Réservations</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .badge-reservé { background:#ffc107; color:#000; }
+        .badge-occupé { background:#dc3545; color:#fff; }
+        .badge-libre { background:#28a745; color:#fff; }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <?php include 'config/dashboard.php'; ?>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-sm-6"><h1>Gestion des Réservations</h1></div>
+                    <div class="col-sm-6 text-end">
+                        <button class="btn btn-primary btn-lg" id="addBtn">Nouvelle réservation</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <?php if ($message): ?>
+                    <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
+                        <?= htmlspecialchars($message) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title">Liste des réservations (<?= count($reservations) ?>)</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Date</th>
+                                        <th>Client</th>
+                                        <th>Chambre</th>
+                                        <th>Période</th>
+                                        <th>Durée</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($reservations as $r): ?>
+                                    <tr>
+                                        <td><strong><?= htmlspecialchars($r['numero_reservation']) ?></strong></td>
+                                        <td><?= date('d/m/Y', strtotime($r['date_reservation'])) ?></td>
+                                        <td><?= htmlspecialchars($r['nom_prenom_client'] ?? '—') ?></td>
+                                        <td><?= htmlspecialchars($r['nom_chambre'] ?? '—') ?></td>
+                                        <td><?= date('d/m', strtotime($r['date_debut'])) ?> → <?= date('d/m/Y', strtotime($r['date_fin'])) ?></td>
+                                        <td><span class="badge bg-info"><?= $r['duree_jours'] ?> j</span></td>
+                                        <td class="text-success fw-bold"><?= formatMoney($r['montant_reservation']) ?></td>
+                                        <td>
+                                            <span class="badge <?= $r['statut_reservation']==='libre'?'bg-success':($r['statut_reservation']==='occupé'?'bg-danger':'bg-warning') ?>">
+                                                <?= ucfirst($r['statut_reservation']) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-warning btn-sm edit-btn"
+                                                data-bs-numero="<?= htmlspecialchars($r['numero_reservation']) ?>"
+                                                data-bs-date_res="<?= $r['date_reservation'] ?>"
+                                                data-bs-heure_res="<?= $r['heure_reservation'] ?>"
+                                                data-bs-date_debut="<?= $r['date_debut'] ?>"
+                                                data-bs-date_fin="<?= $r['date_fin'] ?>"
+                                                data-bs-type_res="<?= htmlspecialchars($r['type_reservation']) ?>"
+                                                data-bs-code_chambre="<?= $r['code_chambre'] ?>"
+                                                data-bs-code_client="<?= $r['code_client'] ?>"
+                                                data-bs-code_facture="<?= $r['code_facture'] ?>"
+                                                data-bs-duree="<?= $r['duree_jours'] ?>"
+                                                data-bs-prix="<?= $r['prix_chambre'] ?>"
+                                                data-bs-montant="<?= $r['montant_reservation'] ?>"
+                                                data-bs-statut="<?= $r['statut_reservation'] ?>"
+                                                data-bs-etat="<?= $r['etat_reservation'] ?>"
+                                                data-bs-obs="<?= htmlspecialchars($r['observation_reservation']) ?>">
+                                                Modifier
+                                            </button>
+                                            <a href="?delete=<?= urlencode($r['numero_reservation']) ?>" 
+                                               class="btn btn-danger btn-sm" 
+                                               onclick="return confirm('Supprimer ?');">Supprimer</a>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="reservationModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle">Nouvelle réservation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="reservationForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="action" id="formAction" value="add">
+                    <div class="row g-3">
+                        <div class="col-md-4"><label>N° Réservation *</label><input type="text" name="numero_reservation" id="numero_reservation" class="form-control" required></div>
+                        <div class="col-md-4"><label>Date réservation</label><input type="date" name="date_reservation" id="date_reservation" class="form-control" value="<?= date('Y-m-d') ?>" required></div>
+                        <div class="col-md-4"><label>Heure</label><input type="time" name="heure_reservation" id="heure_reservation" class="form-control" value="<?= date('H:i') ?>" required></div>
+
+                        <div class="col-md-6"><label>Date début *</label><input type="date" name="date_debut" id="date_debut" class="form-control" required></div>
+                        <div class="col-md-6"><label>Date fin *</label><input type="date" name="date_fin" id="date_fin" class="form-control" required></div>
+
+                        <div class="col-md-6"><label>Client *</label>
+                            <select name="code_client" id="code_client" class="form-select" required>
+                                <option value="">-- Client --</option>
+                                <?php foreach ($clients as $c): ?>
+                                    <option value="<?= $c['code_client'] ?>"><?= htmlspecialchars($c['nom_prenom_client']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label>Chambre *</label>
+                            <select name="code_chambre" id="code_chambre" class="form-select" required>
+                                <option value="">-- Chambre --</option>
+                                <?php foreach ($chambres as $ch): ?>
+                                    <option value="<?= $ch['code_chambre'] ?>"><?= htmlspecialchars($ch['nom_chambre']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4"><label>Prix journalier *</label><input type="number" step="1000" name="prix_chambre" id="prix_chambre" class="form-control" value="50000" required></div>
+                        <div class="col-md-4"><label>Durée (jours) *</label><input type="number" min="1" name="duree_jours" id="duree_jours" class="form-control" value="1" required></div>
+                        <div class="col-md-4"><label>Montant total</label><input type="text" id="montant_reservation" class="form-control bg-light" readonly></div>
+
+                        <div class="col-md-6"><label>Facture</label>
+                            <select name="code_facture" id="code_facture" class="form-select">
+                                <option value="">Aucune</option>
+                                <?php foreach ($factures as $f): ?>
+                                    <option value="<?= $f['code_facture'] ?>"><?= htmlspecialchars($f['titre_facture']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label>Type réservation</label><input type="text" name="type_reservation" id="type_reservation" class="form-control"></div>
+
+                        <div class="col-md-6"><label>Statut</label>
+                            <select name="statut_reservation" id="statut_reservation" class="form-select">
+                                <option value="réservé">Réservé</option>
+                                <option value="occupé">Occupé</option>
+                                <option value="libre">Libre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label>État</label>
+                            <select name="etat_reservation" id="etat_reservation" class="form-select">
+                                <option value="actif">Actif</option>
+                                <option value="en cours">En cours</option>
+                                <option value="inactif">Inactif</option>
+                            </select>
+                        </div>
+                        <div class="col-12"><label>Observation</label><textarea name="observation_reservation" id="observation_reservation" class="form-control" rows="3"></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success btn-lg">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+    const modal = new bootstrap.Modal('#reservationModal');
+
+    // Calcul auto du montant quand durée ou prix change
+    function calculerMontant() {
+        const prix = parseFloat(document.getElementById('prix_chambre').value) || 0;
+        const jours = parseInt(document.getElementById('duree_jours').value) || 0;
+        const total = prix * jours;
+        document.getElementById('montant_reservation').value = new Intl.NumberFormat('fr-FR').format(total) + ' FCFA';
+    }
+
+    document.getElementById('prix_chambre').addEventListener('input', calculerMontant);
+    document.getElementById('duree_jours').addEventListener('input', calculerMontant);
+
+    document.getElementById('addBtn').onclick = () => {
+        document.getElementById('reservationForm').reset();
+        document.getElementById('modalTitle').textContent = 'Nouvelle réservation';
+        document.getElementById('formAction').value = 'add';
+        document.getElementById('numero_reservation').readOnly = false;
+        document.getElementById('date_reservation').value = '<?= date('Y-m-d') ?>';
+        document.getElementById('heure_reservation').value = '<?= date('H:i') ?>';
+        document.getElementById('duree_jours').value = 1;
+        calculerMontant();
+        modal.show();
+    };
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.getElementById('modalTitle').textContent = 'Modifier la réservation';
+            document.getElementById('formAction').value = 'update';
+            document.getElementById('numero_reservation').value = btn.dataset.bsNumero;
+            document.getElementById('numero_reservation').readOnly = true;
+            document.getElementById('date_reservation').value = btn.dataset.bsDateRes;
+            document.getElementById('heure_reservation').value = btn.dataset.bsHeureRes;
+            document.getElementById('date_debut').value = btn.dataset.bsDateDebut;
+            document.getElementById('date_fin').value = btn.dataset.bsDateFin;
+            document.getElementById('type_reservation').value = btn.dataset.bsTypeRes;
+            document.getElementById('code_chambre').value = btn.dataset.bsCodeChambre;
+            document.getElementById('code_client').value = btn.dataset.bsCodeClient;
+            document.getElementById('code_facture').value = btn.dataset.bsCodeFacture;
+            document.getElementById('duree_jours').value = btn.dataset.bsDuree;
+            document.getElementById('prix_chambre').value = btn.dataset.bsPrix;
+            document.getElementById('statut_reservation').value = btn.dataset.bsStatut;
+            document.getElementById('etat_reservation').value = btn.dataset.bsEtat;
+            document.getElementById('observation_reservation').value = btn.dataset.bsObs;
+            calculerMontant();
+            modal.show();
+        };
+    });
+</script>
+</body>
+</html>

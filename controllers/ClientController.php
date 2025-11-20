@@ -9,7 +9,7 @@ class Clients
     {
         try {
             $this->pdo = new PDO(
-                'mysql:host=localhost;dbname=u738064605_soutra','u738064605_soutra','Soutra0709107849!',
+                'mysql:host=localhost;dbname=u738064605_soutra','root','',
                 [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC

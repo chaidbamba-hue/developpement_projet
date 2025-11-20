@@ -119,10 +119,10 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
             <div class="container-fluid">
                 <!-- Message Flash -->
                 <?php if ($message): ?>
-                    <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
-                        <?= htmlspecialchars($message) ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
+                        <!-- <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
+                            <?= htmlspecialchars($message) ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div> -->
                 <?php endif; ?>
 
                 <div class="card">

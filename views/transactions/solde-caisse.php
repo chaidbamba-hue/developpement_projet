@@ -1,12 +1,52 @@
 <?php
+<<<<<<< HEAD
+//session_start();
+require_once __DIR__ . '/../../database/database.php';
+
+// Fonction formatMoney
+=======
 // session_start();
 require_once "database/database.php";
 
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 function formatMoney($amount)
 {
     return number_format((float)$amount, 0, ',', ' ') . ' FCFA';
 }
 
+<<<<<<< HEAD
+// Récupération des dates
+$debut = $_GET['debut'] ?? '';
+$fin   = $_GET['fin']   ?? '';
+
+// Construction de la clause WHERE + paramètres
+$where  = [];
+$params = [];
+
+if (!empty($debut)) {
+    $where[]  = "date_transaction >= ?";
+    $params[] = $debut;
+}
+if (!empty($fin)) {
+    $where[]  = "date_transaction <= ?";
+    $params[] = $fin;
+}
+
+// Toujours ne compter que les transactions réussies
+$where[] = "etat_transaction = 'Succès'";
+
+$whereSql = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : 'WHERE etat_transaction = "Succès"';
+
+// Requête finale
+$sql = "SELECT COALESCE(SUM(montant_total), 0) AS total 
+        FROM transactions 
+        $whereSql";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$total = $stmt->fetchColumn();
+?>
+=======
 // === RÉCUPÉRATION DES DATES (communes aux deux vues) ===
 $debut = $_GET['debut'] ?? '';
 $fin   = $_GET['fin']   ?? '';
@@ -75,21 +115,29 @@ if ($tab === 'clients') {
 }
 ?>
 
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+<<<<<<< HEAD
+    <title>Soutra+ | Solde Caisse</title>
+=======
     <title>Soutra+ | Finances & Soldes</title>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+<<<<<<< HEAD
+=======
         .nav-tabs .nav-link.active {
             background: #007bff !important;
             color: white !important;
             border-color: #007bff;
         }
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
         .card-solde {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -97,33 +145,55 @@ if ($tab === 'clients') {
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+<<<<<<< HEAD
+        .display-2 {
+            font-size: 4.5rem;
+            font-weight: 800;
+        }
+=======
         .display-2 { font-size: 4.5rem; font-weight: 800; }
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
         .periode {
             background: rgba(255,255,255,0.2);
             padding: 8px 16px;
             border-radius: 50px;
             font-size: 0.9rem;
         }
+<<<<<<< HEAD
+=======
         .solde-credit { color: #27ae60; font-weight: 800; }
         .solde-debit { color: #e74c3c; font-weight: 800; }
         .table tr:hover { background-color: #f8f9fa; }
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
     </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
+<<<<<<< HEAD
+    <?php include __DIR__ . '/../../config/dashboard.php'; ?>
+=======
     <?php include 'config/dashboard.php'; ?>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
+<<<<<<< HEAD
+                        <h1>Solde de Caisse</h1>
+=======
                         <h1>Finances & Soldes</h1>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+<<<<<<< HEAD
+                            <li class="breadcrumb-item active">Solde Caisse</li>
+=======
                             <li class="breadcrumb-item active">Finances</li>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                         </ol>
                     </div>
                 </div>
@@ -132,6 +202,88 @@ if ($tab === 'clients') {
 
         <section class="content">
             <div class="container-fluid">
+<<<<<<< HEAD
+                <!-- FILTRE -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title">Période de calcul</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label text-muted">Date de début</label>
+                                <input type="date" name="debut" class="form-control" value="<?= htmlspecialchars($debut) ?>">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label text-muted">Date de fin</label>
+                                <input type="date" name="fin" class="form-control" value="<?= htmlspecialchars($fin) ?>">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Actualiser
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- SOLDE PRINCIPAL -->
+                <div class="card card-solde text-center">
+                    <div class="card-body py-5">
+                        <?php if (!empty($debut) || !empty($fin)): ?>
+                            <div class="periode mb-4">
+                                <?php if ($debut && $fin): ?>
+                                    Du <?= date('d/m/Y', strtotime($debut)) ?> au <?= date('d/m/Y', strtotime($fin)) ?>
+                                <?php elseif ($debut): ?>
+                                    Depuis le <?= date('d/m/Y', strtotime($debut)) ?>
+                                <?php elseif ($fin): ?>
+                                    Jusqu'au <?= date('d/m/Y', strtotime($fin)) ?>
+                                <?php else: ?>
+                                    Toute la période
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <h2 class="display-2 mb-3">
+                            <?= formatMoney($total) ?>
+                        </h2>
+                        <p class="lead opacity-90">
+                            Total encaissé (transactions réussies)
+                        </p>
+
+                        <div class="mt-4">
+                            <span class="badge bg-light text-dark fs-6 px-4 py-2">
+                                Mise à jour : <?= date('d/m/Y à H:i') ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Infobox -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="info-box bg-success">
+                            <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Paiements réussis</span>
+                                <span class="info-box-number"><?= formatMoney($total) ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box bg-warning">
+                            <span class="info-box-icon"><i class="fas fa-clock"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">En attente / Échecs</span>
+                                <span class="info-box-number">Non comptabilisés</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+=======
 
                 <!-- FILTRE DE DATE COMMUN -->
                 <div class="card mb-4">
@@ -305,6 +457,7 @@ if ($tab === 'clients') {
         <strong>© 2025 <a href="#">Soutra+</a>.</strong> Tous droits réservés.
         <div class="float-right d-none d-sm-inline-block"><b>Version</b> 1.0</div>
     </footer>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

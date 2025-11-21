@@ -1,4 +1,149 @@
 <?php
+<<<<<<< HEAD
+require "./database/database.php";
+
+// Inclusion FPDF uniquement pour l'export PDF
+if (isset($_POST['export']) && $_POST['export'] === 'pdf') {
+    require_once './librairies/fpdf/fpdf.php';
+}
+
+// ==================== EXPORT EXCEL / CSV / PDF ====================
+if (isset($_POST['export']) && in_array($_POST['export'], ['excel', 'csv', 'pdf'])) {
+
+    $stmt = $pdo->query("
+        SELECT t.*, 
+               c.nom_prenom_client, 
+               f.titre_facture, 
+               u.nom_prenom as nom_utilisateur
+        FROM transactions t
+        LEFT JOIN clients c ON t.destinataire = c.code_client
+        LEFT JOIN factures f ON t.code_facture = f.code_facture
+        LEFT JOIN utilisateurs u ON t.utilisateur_id = u.utilisateur_id
+        ORDER BY t.date_transaction DESC, t.heure_transaction DESC
+    ");
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (ob_get_level()) ob_end_clean();
+
+    // ====================== CSV ======================
+    if ($_POST['export'] === 'csv') {
+        $filename = 'Transactions_' . date('d-m-Y_H-i') . '.csv';
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        echo "\xEF\xBB\xBF";
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['N°','Date','Heure','Montant','Frais','Total','Type','Client','Facture','Utilisateur','Mode','État'], ';');
+
+        foreach ($data as $row) {
+            fputcsv($output, [
+                $row['numero_transaction'],
+                $row['date_transaction'],
+                $row['heure_transaction'],
+                $row['montant_transaction'],
+                $row['frais_transaction'],
+                $row['montant_total'],
+                $row['type_transaction'],
+                $row['nom_prenom_client'] ?? $row['destinataire'] ?? '',
+                $row['titre_facture'] ?? $row['code_facture'] ?? '',
+                $row['nom_utilisateur'] ?? $row['utilisateur_id'] ?? '',
+                $row['mode_reglement'],
+                $row['etat_transaction']
+            ], ';');
+        }
+        exit;
+    }
+
+    // ====================== EXCEL ======================
+    if ($_POST['export'] === 'excel') {
+        $filename = 'Transactions_' . date('d-m-Y_H-i') . '.xls';
+        header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        echo "\xEF\xBB\xBF";
+        ?>
+        <table border="1">
+            <tr style="background:#007bff;color:white;font-weight:bold;">
+                <th>N° Transaction</th><th>Date</th><th>Heure</th><th>Montant</th><th>Frais</th><th>Total</th>
+                <th>Type</th><th>Client</th><th>Facture</th><th>Utilisateur</th><th>Mode</th><th>État</th>
+            </tr>
+            <?php foreach ($data as $row): ?>
+            <tr align="center">
+                <td><?= htmlspecialchars($row['numero_transaction']) ?></td>
+                <td><?= htmlspecialchars($row['date_transaction']) ?></td>
+                <td><?= htmlspecialchars($row['heure_transaction']) ?></td>
+                <td><?= number_format($row['montant_transaction']) ?></td>
+                <td><?= number_format($row['frais_transaction']) ?></td>
+                <td><?= number_format($row['montant_total']) ?></td>
+                <td><?= htmlspecialchars($row['type_transaction']) ?></td>
+                <td><?= htmlspecialchars($row['nom_prenom_client'] ?? $row['destinataire'] ?? '') ?></td>
+                <td><?= htmlspecialchars($row['titre_facture'] ?? $row['code_facture'] ?? '') ?></td>
+                <td><?= htmlspecialchars($row['nom_utilisateur'] ?? $row['utilisateur_id'] ?? '') ?></td>
+                <td><?= htmlspecialchars($row['mode_reglement']) ?></td>
+                <td><?= htmlspecialchars($row['etat_transaction'] ?? $row['etat_transaction']) ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+        <?php
+        exit;
+    }
+
+    // ====================== PDF (A4 Paysage recommandé) ======================
+    if ($_POST['export'] === 'pdf') {
+        $pdf = new FPDF('L', 'mm', 'A4'); // Paysage pour plus de colonnes
+        $pdf->AddPage();
+        $pdf->SetFont('Arial', 'B', 18);
+        $pdf->SetFillColor(0,123,255);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->Cell(0,15, ('Liste des Transactions'), 0,1,'C',true);
+        $pdf->Ln(5);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(0,8, ('Généré le ') . date('d/m/Y à H:i'),0,1,'R');
+        $pdf->Ln(8);
+
+        $pdf->SetFont('Arial','B',9);
+        $pdf->SetFillColor(230,230,230);
+        $pdf->Cell(20,10,'N° Trans',1,0,'C',true);
+        $pdf->Cell(25,10,'Date/Heure',1,0,'C',true);
+        $pdf->Cell(25,10,'Montant',1,0,'C',true);
+        $pdf->Cell(20,10,'Frais',1,0,'C',true);
+        $pdf->Cell(25,10,'Total',1,0,'C',true);
+        $pdf->Cell(35,10,'Type',1,0,'C',true);
+        $pdf->Cell(50,10,'Client / Destinataire',1,0,'C',true);
+        $pdf->Cell(40,10,'Facture',1,0,'C',true);
+        $pdf->Cell(30,10,'Utilisateur',1,0,'C',true);
+        $pdf->Cell(25,10,'État',1,1,'C',true);
+
+        $pdf->SetFont('Arial','',9);
+        foreach ($data as $row) {
+            $dateHeure = date('d/m/Y H:i', strtotime($row['date_transaction'] . ' ' . $row['heure_transaction']));
+            $client = $row['nom_prenom_client'] ?? $row['destinataire'] ?? '—';
+            $facture = $row['titre_facture'] ?? $row['code_facture'] ?? '—';
+            $user = $row['nom_utilisateur'] ?? $row['utilisateur_id'] ?? '—';
+
+            $pdf->Cell(20,8,$row['numero_transaction'],1,0,'C');
+            $pdf->Cell(25,8,$dateHeure,1,0,'C');
+            $pdf->Cell(25,8,number_format($row['montant_transaction']),1,0,'R');
+            $pdf->Cell(20,8,number_format($row['frais_transaction']),1,0,'R');
+            $pdf->Cell(25,8,number_format($row['montant_total']),1,0,'R');
+            $pdf->Cell(35,8,utf8_decode($row['type_transaction']),1,0,'C');
+            $pdf->Cell(50,8,utf8_decode($client),1,0,'L');
+            $pdf->Cell(40,8,utf8_decode($facture),1,0,'L');
+            $pdf->Cell(30,8,utf8_decode($user),1,0,'C');
+            $pdf->Cell(25,8,utf8_decode($row['etat_transaction']),1,1,'C');
+        }
+
+        $pdf->Output('D', 'Transactions_' . date('d-m-Y_H-i') . '.pdf');
+        exit;
+    }
+}
+
+// ==================== AFFICHAGE NORMAL ====================
+$stmt = $pdo->query("SELECT t.*, 
+           c.nom_prenom_client, 
+           f.titre_facture, 
+           u.nom_prenom as nom_utilisateur
+=======
 //session_start();
 require_once __DIR__ . '/../../database/database.php';
 
@@ -67,6 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // === LISTE + DONNÉES POUR SELECT ===
 $stmt = $pdo->query("
     SELECT t.*, c.nom_prenom_client, f.titre_facture, u.nom_prenom as nom_utilisateur
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
     FROM transactions t
     LEFT JOIN clients c ON t.destinataire = c.code_client
     LEFT JOIN factures f ON t.code_facture = f.code_facture
@@ -74,6 +220,8 @@ $stmt = $pdo->query("
     ORDER BY t.date_transaction DESC, t.heure_transaction DESC
 ");
 $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+<<<<<<< HEAD
+=======
 
 $clients      = $pdo->query("SELECT code_client, nom_prenom_client FROM clients ORDER BY nom_prenom_client")->fetchAll(PDO::FETCH_ASSOC);
 $factures     = $pdo->query("SELECT code_facture, titre_facture FROM factures ORDER BY titre_facture")->fetchAll(PDO::FETCH_ASSOC);
@@ -82,6 +230,7 @@ $utilisateurs = $pdo->query("SELECT utilisateur_id, nom_prenom FROM utilisateurs
 $message = $_SESSION['message'] ?? '';
 $alert_type = str_starts_with($message, 'Erreur') ? 'danger' : 'success';
 if ($message) unset($_SESSION['message']);
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 ?>
 
 <!DOCTYPE html>
@@ -89,6 +238,15 @@ if ($message) unset($_SESSION['message']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+<<<<<<< HEAD
+    <title>Hotelio | Transactions</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <?php include './config/dashboard.php'; ?>
+=======
     <title>Soutra+ | Gestion des Transactions</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5/css/all.min.css">
@@ -105,21 +263,97 @@ if ($message) unset($_SESSION['message']);
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
     <?php include __DIR__ . '/../../config/dashboard.php'; ?>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
+<<<<<<< HEAD
+                <h1 class="mb-0">Transactions (<?= count($transactions) ?> enregistrées)</h1>
+=======
                 <div class="row mb-2 align-items-center">
                     <div class="col-sm-6"><h1>Gestion des Transactions</h1></div>
                     <div class="col-sm-6 text-end">
                         <button class="btn btn-primary" id="addBtn">Ajouter une transaction</button>
                     </div>
                 </div>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
             </div>
         </section>
 
         <section class="content">
             <div class="container-fluid">
+<<<<<<< HEAD
+
+                <!-- Boutons Export -->
+                <form method="post" class="d-flex justify-content-end mb-4 gap-2 flex-wrap">
+                    <button type="submit" name="export" value="excel" class="btn btn-success">
+                        Excel
+                    </button>&nbsp &nbsp
+                    <button type="submit" name="export" value="csv" class="btn btn-info text-white">
+                        CSV
+                    </button>&nbsp &nbsp
+                    <button type="submit" name="export" value="pdf" class="btn btn-danger">
+                        PDF
+                    </button>&nbsp &nbsp
+                </form>
+
+                <!-- Chaque transaction dans une belle card -->
+                <?php foreach ($transactions as $t): ?>
+                <div class="card mb-4 shadow-sm border-start border-primary border-5">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            Transaction N° <strong><?= htmlspecialchars($t['numero_transaction']) ?></strong>
+                            <small class="ms-3">
+                                le <?= date('d/m/Y à H:i', strtotime($t['date_transaction'] . ' ' . $t['heure_transaction'])) ?>
+                            </small>
+                        </h5>
+                        <div>
+                            <span class="badge bg-light text-dark fs-6 fw-bold text-success">
+                                <?= number_format($t['montant_total']) ?> FCFA
+                            </span>
+                            <span class="badge bg-<?= 
+                                $t['etat_transaction'] === 'Succès' ? 'success' : 
+                                ($t['etat_transaction'] === 'Echec' ? 'danger' : 'warning') ?> ms-2">
+                                <?= $t['etat_transaction'] ?? 'En attente' ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Montant</th>
+                                        <th>Frais</th>
+                                        <th>Total</th>
+                                        <th>Client / Destinataire</th>
+                                        <th>Facture liée</th>
+                                        <th>Mode règlement</th>
+                                        <th>Enregistré par</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="text-center">
+                                        <td><span class="badge bg-info text-dark"><?= htmlspecialchars($t['type_transaction'] ?? '') ?></span></td>
+                                        <td><?= number_format($t['montant_transaction']) ?> FCFA</td>
+                                        <td><?= number_format($t['frais_transaction'] ?? 0) ?> FCFA</td>
+                                        <td class="text-success fw-bold fs-5"><?= number_format($t['montant_total']) ?> FCFA</td>
+                                        <td><?= htmlspecialchars($t['nom_prenom_client'] ?? $t['destinataire'] ?? '—') ?></td>
+                                        <td><?= htmlspecialchars($t['titre_facture'] ?? $t['code_facture'] ?? 'Aucune') ?></td>
+                                        <td><span class="badge bg-secondary"><?= htmlspecialchars($t['mode_reglement'] ?? '') ?></span></td>
+                                        <td><?= htmlspecialchars($t['nom_utilisateur'] ?? $t['utilisateur_id'] ?? 'Système') ?></td>
+                                        <td>
+                                            <a href="impression.php?numero=<?= urlencode($t['numero_transaction']) ?>" 
+                                               class="btn btn-success btn-sm" target="_blank">
+                                                Reçu
+                                            </a>
+                                        </td>
+                                    </tr>
+=======
                 <?php if ($message): ?>
                     <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
                         <?= htmlspecialchars($message) ?>
@@ -191,15 +425,30 @@ if ($message) unset($_SESSION['message']);
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+<<<<<<< HEAD
+                <?php endforeach; ?>
+
+                <?php if (empty($transactions)): ?>
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-receipt fa-3x mb-3"></i><br>
+                        Aucune transaction enregistrée pour le moment.
+                    </div>
+                <?php endif; ?>
+
+=======
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
             </div>
         </section>
     </div>
 </div>
+<<<<<<< HEAD
+=======
 
 <!-- MODAL COMPLET -->
 <div class="modal fade" id="transactionModal" tabindex="-1">
@@ -336,5 +585,6 @@ if ($message) unset($_SESSION['message']);
     document.getElementById('montant_transaction')?.addEventListener('input', updateTotal);
     document.getElementById('frais_transaction')?.addEventListener('input', updateTotal);
 </script>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 </body>
 </html>

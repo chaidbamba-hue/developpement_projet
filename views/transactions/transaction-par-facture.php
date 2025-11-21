@@ -1,12 +1,25 @@
 <?php
+<<<<<<< HEAD
+//session_start(); // Réactivé (nécessaire si tu utilises des messages flash ailleurs)
+require_once __DIR__ . '/../../database/database.php'; // Chemin correct
+
+// Fonction formatMoney (indispensable ici)
+=======
 // session_start();
 require_once "database/database.php";
 
 // Fonction commune
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 function formatMoney($amount) {
     return number_format((float)$amount, 0, ',', ' ') . ' FCFA';
 }
 
+<<<<<<< HEAD
+// Récupération des filtres
+$facture = $_GET['facture'] ?? '';
+$debut   = $_GET['debut'] ?? '';
+$fin     = $_GET['fin'] ?? '';
+=======
 // Récupération du mode de filtrage
 $mode = $_GET['mode'] ?? 'facture'; // facture, client, type
 
@@ -16,11 +29,18 @@ $client = $_GET['client'] ?? '';
 $type = $_GET['type'] ?? '';
 $debut = $_GET['debut'] ?? '';
 $fin = $_GET['fin'] ?? '';
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
 // Construction sécurisée de la requête
 $where = "WHERE 1=1";
 $params = [];
 
+<<<<<<< HEAD
+if (!empty($facture)) {
+    $where .= " AND t.code_facture = ?";
+    $params[] = $facture;
+}
+=======
 if ($mode === 'facture' && !empty($facture)) {
     $where .= " AND t.code_facture = ?";
     $params[] = $facture;
@@ -33,6 +53,7 @@ if ($mode === 'type' && !empty($type)) {
     $where .= " AND t.type_transaction = ?";
     $params[] = $type;
 }
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 if (!empty($debut)) {
     $where .= " AND t.date_transaction >= ?";
     $params[] = $debut;
@@ -42,8 +63,14 @@ if (!empty($fin)) {
     $params[] = $fin;
 }
 
+<<<<<<< HEAD
+// Requête principale
+$sql = "
+    SELECT t.*, 
+=======
 $sql = "
     SELECT t.*,
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
            COALESCE(c.nom_prenom_client, t.destinataire) AS nom_client,
            f.titre_facture
     FROM transactions t
@@ -52,10 +79,19 @@ $sql = "
     $where
     ORDER BY t.date_transaction DESC, t.heure_transaction DESC
 ";
+<<<<<<< HEAD
+
+=======
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+<<<<<<< HEAD
+// Liste des factures pour le filtre
+$factures = $pdo->query("SELECT code_facture, titre_facture FROM factures ORDER BY titre_facture")->fetchAll(PDO::FETCH_ASSOC);
+?>
+=======
 // Données pour les filtres
 $factures = $pdo->query("SELECT code_facture, titre_facture FROM factures ORDER BY titre_facture")->fetchAll(PDO::FETCH_ASSOC);
 $clients  = $pdo->query("SELECT code_client, nom_prenom_client FROM clients ORDER BY nom_prenom_client")->fetchAll(PDO::FETCH_ASSOC);
@@ -66,16 +102,26 @@ $user_role = "Administrateur";
 $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
 ?>
 
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+<<<<<<< HEAD
+    <title>Soutra+ | Transactions par Facture</title>
+=======
     <title>Soutra+ | Transactions Globales</title>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+<<<<<<< HEAD
+        .card-header { background: #f8f9fa; }
+        .badge-success { background-color: #28a745 !important; }
+        .badge-warning { background-color: #ffc107 !important; color: #212529 !important; }
+=======
         .user-panel img { width: 2.1rem; height: 2.1rem; object-fit: cover; border-radius: 50%; }
         .nav-sidebar .nav-link { border-radius: 0.25rem; }
         .card { transition: all 0.2s; }
@@ -84,24 +130,37 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
         .table-hover tbody tr:hover { background-color: #f8f9fa; }
         .filter-card { border-left: 5px solid #007bff; }
         .mode-btn { min-width: 140px; }
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
     </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
+<<<<<<< HEAD
+    <?php include __DIR__ . '/../../config/dashboard.php'; // Chemin correct ?>
+=======
 
     <?php include 'config/dashboard.php'; ?>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
+<<<<<<< HEAD
+                        <h1><i class="fas fa-receipt"></i> Transactions par Facture</h1>
+=======
                         <h1><i class="fas fa-exchange-alt text-primary"></i> Transactions Globales</h1>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+<<<<<<< HEAD
+                            <li class="breadcrumb-item active">Transactions / Factures</li>
+=======
                             <li class="breadcrumb-item active">Transactions</li>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                         </ol>
                     </div>
                 </div>
@@ -110,6 +169,28 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
 
         <section class="content">
             <div class="container-fluid">
+<<<<<<< HEAD
+                <div class="card shadow">
+                    <div class="card-header">
+                        <form method="get" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Facture</label>
+                                <select name="facture" class="form-select">
+                                    <option value="">Toutes les factures</option>
+                                    <?php foreach ($factures as $f): ?>
+                                        <option value="<?= htmlspecialchars($f['code_facture']) ?>" 
+                                            <?= $facture === $f['code_facture'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($f['titre_facture']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Date début</label>
+                                <input type="date" name="debut" class="form-control" value="<?= htmlspecialchars($debut) ?>">
+                            </div>
+                            <div class="col-md-3">
+=======
                 <div class="card filter-card shadow-sm">
                     <div class="card-header bg-primary text-white">
                         <h3 class="card-title"><i class="fas fa-filter"></i> Filtrer les transactions</h3>
@@ -164,16 +245,38 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                                 <input type="date" name="debut" class="form-control" value="<?= htmlspecialchars($debut) ?>">
                             </div>
                             <div class="col-md-2">
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                 <label class="form-label fw-bold">Date fin</label>
                                 <input type="date" name="fin" class="form-control" value="<?= htmlspecialchars($fin) ?>">
                             </div>
                             <div class="col-md-2">
+<<<<<<< HEAD
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter"></i> Filtrer
+=======
                                 <button type="submit" class="btn btn-light w-100 fw-bold">
                                     <i class="fas fa-search"></i> Filtrer
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                 </button>
                             </div>
                         </form>
                     </div>
+<<<<<<< HEAD
+
+                    <div class="card-body">
+                        <?php if (empty($transactions)): ?>
+                            <div class="alert alert-info text-center">
+                                Aucune transaction trouvée avec ces critères.
+                            </div>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover align-middle">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>N° Transaction</th>
+                                            <th>Montant Total</th>
+=======
                 </div>
 
                 <?php if (empty($transactions)): ?>
@@ -197,6 +300,7 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                                             <th>Date & Heure</th>
                                             <th>N° Transaction</th>
                                             <th>Montant</th>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                             <th>Type</th>
                                             <th>Client</th>
                                             <th>Facture</th>
@@ -206,6 +310,30 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                                     </thead>
                                     <tbody>
                                         <?php foreach ($transactions as $t): ?>
+<<<<<<< HEAD
+                                            <tr>
+                                                <td><?= date('d/m/Y', strtotime($t['date_transaction'])) ?></td>
+                                                <td><strong><?= htmlspecialchars($t['numero_transaction']) ?></strong></td>
+                                                <td class="text-end fw-bold text-success">
+                                                    <?= formatMoney($t['montant_total']) ?>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">
+                                                        <?= htmlspecialchars($t['type_transaction']) ?>
+                                                    </span>
+                                                </td>
+                                                <td><?= htmlspecialchars($t['nom_client'] ?? $t['destinataire']) ?></td>
+                                                <td><?= htmlspecialchars($t['titre_facture'] ?? $t['code_facture']) ?></td>
+                                                <td>
+                                                    <span class="badge bg-<?= $t['etat_transaction'] === 'Succès' ? 'success' : 'warning' ?>">
+                                                        <?= htmlspecialchars($t['etat_transaction']) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="http://localhost/soutra/transaction/impression?numero=<?= urlencode($t['numero_transaction']) ?>" 
+                                                       class="btn btn-sm btn-success" target="_blank" title="Imprimer le reçu">
+                                                        Reçu
+=======
                                             <?php
                                             $etatClass = match($t['etat_transaction']) {
                                                 'Succès' => 'success',
@@ -227,6 +355,7 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                                                     <a href="impression?numero=<?= urlencode($t['numero_transaction']) ?>"
                                                        class="btn btn-sm btn-success" target="_blank" title="Imprimer le reçu">
                                                         <i class="fas fa-print"></i> Reçu
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                                     </a>
                                                 </td>
                                             </tr>
@@ -234,6 +363,18 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                                     </tbody>
                                 </table>
                             </div>
+<<<<<<< HEAD
+
+                            <div class="mt-3 text-muted small">
+                                <strong><?= count($transactions) ?></strong> transaction(s) trouvée(s)
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+=======
                         </div>
                     </div>
                 <?php endif; ?>
@@ -245,6 +386,7 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
         <strong>© 2025 <a href="#">Soutra+</a>.</strong> Tous droits réservés.
         <div class="float-right d-none d-sm-inline-block"><b>Version</b> 2.0</div>
     </footer>
+>>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -8,7 +8,7 @@ $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $login = trim($_POST['login'] ?? '');
-    $mdp   = $_POST['mdp'] ?? ''; // pas de trim sur le mdp !
+    $mdp   = $_POST['mdp'] ?? ''; // pas de trim sur le mdp ! 
 
     // Correction du bug ici
     $login = trim($_POST['login'] ?? '');
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             // ON RETIRE mdp=? de la requête SQL ! On cherche seulement par login + état
-            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE login = ? AND etat = 'Actif' ");
+            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE login = ? AND etat = 'actif' ");
             $stmt->execute([$login]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

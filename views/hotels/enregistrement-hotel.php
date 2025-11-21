@@ -117,6 +117,7 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
 
         <section class="content">
             <div class="container-fluid">
+                
                 <!-- Message Flash -->
                 <?php if ($message): ?>
                         <!-- <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">

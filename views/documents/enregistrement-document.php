@@ -1,6 +1,12 @@
 <?php
-////session_start();
+//session_start();
 require "database/database.php";
+
+// ==================== FONCTION GÉNÉRATION CODE DOCUMENT ====================
+function genererCodeDocument($pdo) {
+    $count = $pdo->query("SELECT COUNT(*) FROM documents")->fetchColumn();
+    return 'DOC' . ($count + 1);
+}
 
 // ==================== SUPPRESSION ====================
 if (isset($_GET['delete'])) {
@@ -11,8 +17,6 @@ if (isset($_GET['delete'])) {
     } catch (Exception $e) {
         $_SESSION['message'] = "Erreur : " . $e->getMessage();
     }
-    // header("Location: crud_documents.php" . (isset($_GET['client']) ? "?client=" . urlencode($_GET['client']) : ""));
-    // exit;
 }
 
 // ==================== AJOUT / MODIFICATION ====================
@@ -27,6 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $etat = trim($_POST['etat_document']);
     $code_client = trim($_POST['code_client']);
 
+    // Génération automatique du code lors de l'ajout si vide
+    if ($action === 'add' && empty($code_doc)) {
+        $code_doc = genererCodeDocument($pdo);
+    }
+
     try {
         if ($action === 'add') {
             $sql = "INSERT INTO documents
@@ -35,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     VALUES (?,?,?,?,?,?,?,?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$code_doc, $titre, $numero, $date_delivrance, $date_expiration, $observation, $etat, $code_client]);
-            $_SESSION['message'] = "Document ajouté avec succès.";
+            $_SESSION['message'] = "Document ajouté avec succès. Code généré : <strong>$code_doc</strong>";
         }
         if ($action === 'update') {
             $sql = "UPDATE documents SET
@@ -51,8 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $redirect = "crud_documents.php";
     if (isset($_GET['client'])) $redirect .= "?client=" . urlencode($_GET['client']);
-   // header("Location: $redirect");
-    //exit;
+   
 }
 
 // ==================== FILTRE PAR CLIENT ====================
@@ -79,11 +87,6 @@ $clients = $pdo->query("SELECT code_client, nom_prenom_client FROM clients ORDER
 $message = $_SESSION['message'] ?? '';
 $alert_type = str_contains($message, 'Erreur') ? 'danger' : 'success';
 if ($message) unset($_SESSION['message']);
-
-// ==================== UTILISATEUR CONNECTÉ ====================
-$user_name = "Jean Dupont";
-$user_role = "Administrateur";
-$user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -107,8 +110,6 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
     <?php include 'config/dashboard.php'; ?>
-
-    <!-- ==================== CONTENT ==================== -->
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
@@ -125,19 +126,17 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                 </div>
             </div>
         </section>
-
         <section class="content">
             <div class="container-fluid">
-
                 <!-- Message Flash -->
                 <?php if ($message): ?>
                     <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
-                        <?= htmlspecialchars($message) ?>
+                        <?= $message ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
 
-                <!-- === FILTRE PAR CLIENT === -->
+                <!-- FILTRE PAR CLIENT -->
                 <div class="filter-card">
                     <form method="GET" class="row g-3 align-items-end">
                         <div class="col-md-5">
@@ -145,7 +144,7 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                             <select name="client" class="form-select">
                                 <option value="">Tous les clients</option>
                                 <?php foreach ($clients as $c): ?>
-                                    <option value="<?= $c['code_client'] ?>" 
+                                    <option value="<?= $c['code_client'] ?>"
                                         <?= ($client_filter === $c['code_client']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($c['nom_prenom_client']) ?>
                                     </option>
@@ -153,14 +152,14 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100">
-                                Filtrer
-                            </button>
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
                         </div>
                         <div class="col-md-3">
-                            <a href="crud_documents.php" class="btn btn-secondary w-100">
-                                Réinitialiser
-                            </a>
+                            <?php if ($client_filter): ?>
+                                <a href="crud_documents.php" class="btn btn-secondary w-100">Réinitialiser</a>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-secondary w-100" disabled>Réinitialiser</button>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>
@@ -168,17 +167,15 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title">
-                            Liste des documents 
+                            Liste des documents
                             <?php if ($client_filter): ?>
                                 <small class="text-muted">
-                                    — Client : 
+                                    — Client :
                                     <?= htmlspecialchars(array_column($clients, 'nom_prenom_client', 'code_client')[$client_filter] ?? '') ?>
                                 </small>
                             <?php endif; ?>
                         </h3>
-                        <button class="btn btn-success" id="addBtn">
-                            Ajouter un document
-                        </button>
+                        <button class="btn btn-success" id="addBtn">Ajouter un document</button>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -217,8 +214,8 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <span class="badge bg-<?= 
-                                                    $d['etat_document'] === 'valide' ? 'success' : 
+                                                <span class="badge bg-<?=
+                                                    $d['etat_document'] === 'valide' ? 'success' :
                                                     ($d['etat_document'] === 'expiré' ? 'danger' : 'warning')
                                                 ?>">
                                                     <?= ucfirst($d['etat_document']) ?>
@@ -261,12 +258,9 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
             </div>
         </section>
     </div>
-
     <footer class="main-footer">
         <strong>© 2025 <a href="#">Soutra+</a>.</strong> Tous droits réservés.
-        <div class="float-right d-none d-sm-inline-block">
-            <b>Version</b> 1.0
-        </div>
+        <div class="float-right d-none d-sm-inline-block"><b>Version</b> 1.0</div>
     </footer>
 </div>
 
@@ -283,8 +277,8 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                     <input type="hidden" name="action" id="formAction" value="add">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Code document <span class="text-danger">*</span></label>
-                            <input type="text" name="code_document" id="code_document" class="form-control" required>
+                            <label class="form-label">Code document <span class="text-muted">(auto-généré)</span></label>
+                            <input type="text" name="code_document" id="code_document" class="form-control" readonly placeholder="Ex: DOC46">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Titre document <span class="text-danger">*</span></label>
@@ -296,7 +290,7 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Client <span class="text-danger">*</span></label>
-                            <select name="code_client" id="code_client" class="form-select" >
+                            <select name="code_client" id="code_client" class="form-select" required>
                                 <option value="">-- Sélectionner un client --</option>
                                 <?php foreach ($clients as $c): ?>
                                     <option value="<?= $c['code_client'] ?>"><?= htmlspecialchars($c['nom_prenom_client']) ?></option>
@@ -333,7 +327,6 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
@@ -341,16 +334,17 @@ $user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
     const modal = new bootstrap.Modal('#docModal');
     const form = document.getElementById('docForm');
 
-    // Ajouter
+    // === AJOUTER UN DOCUMENT → CODE AUTO ===
     document.getElementById('addBtn').addEventListener('click', () => {
         form.reset();
         document.getElementById('modalTitle').innerText = 'Ajouter un document';
         document.getElementById('formAction').value = 'add';
-        document.getElementById('code_document').readOnly = false;
+        document.getElementById('code_document').readOnly = true;
+        document.getElementById('code_document').value = '<?= genererCodeDocument($pdo) ?>';
         modal.show();
     });
 
-    // Modifier
+    // === MODIFIER UN DOCUMENT ===
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             document.getElementById('modalTitle').innerText = 'Modifier un document';

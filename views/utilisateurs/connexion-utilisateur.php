@@ -13,25 +13,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Tous les champs sont obligatoires.";
     } else {
         try {
-            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE login = ? AND mdp= ? AND etat = 'Actif'");
-            $stmt->execute([$login,$mdp]);
+            // 1. On récupère l'utilisateur par login + état actif
+            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE login = ? AND etat = 'actif' LIMIT 1");
+            $stmt->execute([$login]);
             $user = $stmt->fetch();
 
-            if (!empty($user)) {
-                // === SESSION COMPLÈTE ===
+            if ($user && password_verify($mdp, $user['mdp'])) {
+                // Connexion réussie → on crée la session
                 $_SESSION['utilisateur_id'] = $user['utilisateur_id'];
-                $_SESSION['nom_prenom'] = $user['nom_prenom'];
-                $_SESSION['login'] = $user['login'];
-                $_SESSION['mdp'] = $user['mdp']; // pour ta protection
-                $_SESSION['role'] = $user['role'];
-                $_SESSION['photo'] = $user['photo'];
-                $_SESSION['type_photo'] = $user['type_photo'];
+                $_SESSION['nom_prenom']     = $user['nom_prenom'];
+                $_SESSION['login']          = $user['login'];
+                $_SESSION['role']           = $user['role'];
+                $_SESSION['photo']          = $user['photo'];
+                $_SESSION['type_photo']     = $user['type_photo'];
 
-                // Redirection vers le CRUD
-                 ?>
-            <script type='text/javascript'>document.location.replace('<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/utilisateur/dashboard');</script>";
-            <?php
- 
+                // Redirection propre et sécurisée
+                $base_url = dirname($_SERVER['SCRIPT_NAME']);
+                if (substr($base_url, -1) === '/') {
+                    $base_url = substr($base_url, 0, -1);
+                }
+                header("Location: $base_url/utilisateur/dashboard");
+                exit;
             } else {
                 $error = "Login ou mot de passe incorrect.";
             }
@@ -47,26 +49,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Soutra+ | Connexion</title>
-    <!-- AdminLTE + FontAwesome + Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .login-page {
-            background: #f8f9fa; /* Fond gris très clair, propre et professionnel */
+            background: #f8f9fa;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
         }
-        .login-box {
-            width: 100%;
-            max-width: 400px;
-        }
+        .login-box { width: 100%; max-width: 400px; }
         .card {
             border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
             border: 1px solid #e0e0e0;
         }
@@ -77,59 +75,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 2rem 1rem;
         }
         .card-header img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid white;
-            margin-bottom: 1rem;
+            width: 80px; height: 80px;
+            border-radius: 50%; object-fit: cover;
+            border: 4px solid white; margin-bottom: 1rem;
         }
-        .input-group-text {
-            background: #007bff;
-            color: white;
-            border: none;
-        }
-        .form-control {
-            border-radius: 0.5rem;
-        }
+        .input-group-text { background: #007bff; color: white; border: none; }
+        .form-control { border-radius: 0.5rem; }
         .btn-primary {
-            background: #007bff;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            font-weight: 600;
-            transition: 0.3s;
+            background: #007bff; border: none;
+            border-radius: 0.5rem; padding: 0.75rem;
+            font-weight: 600; transition: 0.3s;
         }
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-        .alert {
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-        }
-        .text-muted a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .text-muted a:hover {
-            text-decoration: underline;
-        }
+        .btn-primary:hover { background: #0056b3; }
+        .alert { border-radius: 0.5rem; font-size: 0.9rem; }
+        .text-muted a { color: #007bff; text-decoration: none; }
+        .text-muted a:hover { text-decoration: underline; }
     </style>
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">
     <div class="card">
-        <!-- En-tête -->
         <div class="card-header">
             <img src="https://via.placeholder.com/80/007bff/ffffff?text=S+" alt="Logo">
             <h4 class="mb-0"><b>Soutra</b>+</h4>
             <small>Gestion Hôtelière</small>
         </div>
-        <!-- Corps -->
         <div class="card-body p-4">
             <p class="login-box-msg text-center mb-4">Connectez-vous à votre compte</p>
 
-            <!-- Message d'erreur -->
             <?php if (isset($error)): ?>
                 <div class="alert alert-danger alert-dismissible fade show">
                     <?= htmlspecialchars($error) ?>
@@ -137,27 +110,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <!-- Formulaire -->
             <form method="post" action="">
                 <div class="input-group mb-3">
                     <input type="text" name="login" class="form-control" placeholder="Login" required autofocus>
-                    <span class="input-group-text">
-                        <span class="fas fa-user"></span>
-                    </span>
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
                 </div>
                 <div class="input-group mb-4">
                     <input type="password" name="mdp" class="form-control" placeholder="Mot de passe" required>
-                    <span class="input-group-text">
-                        <span class="fas fa-lock"></span>
-                    </span>
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary btn-block w-100">
                             Se connecter
                         </button>
-                        <br>
-                        Vous n'avez pas de compte? <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/utilisateur/inscription">Inscrivez-vous</a>
+                        <br><br>
+                        Vous n'avez pas de compte ? 
+                        <a href="<?= dirname($_SERVER['SCRIPT_NAME']) ?>/utilisateur/inscription">
+                            Inscrivez-vous
+                        </a>
                     </div>
                 </div>
             </form>
@@ -170,7 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

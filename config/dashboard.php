@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-<style>
-    .user-menu .dropdown-menu {
-    z-index: 1070;
-}
-</style>
-<!-- ==================== NAVBAR ==================== -->
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <ul class="navbar-nav">
-        <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-                <i class="fas fa-bars"></i>
-            </a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="index.php" class="nav-link">Accueil</a>
-=======
 <?php
 // config/dashboard.php
 $user_name = "Jean Dupont";
@@ -35,38 +18,10 @@ function old_url($path = '') {
         </li>
         <li class="nav-item d-none d-sm-inline-block">
             <a href="index.php" class="nav-link fw-semibold">Accueil</a>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
         </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">
-<<<<<<< HEAD
-        <li class="nav-item dropdown user-menu">
-            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                <img src="data:<?php echo $_SESSION['type_photo']; ?>;base64,<?php echo base64_encode($_SESSION['photo']); ?>" class="user-image img-circle elevation-2" alt="User Image">
-                <span class="d-none d-md-inline"><?= $_SESSION['nom_prenom']; ?></span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-start">
-                <li class="user-header bg-primary">
-                    <img src="data:<?php echo $_SESSION['type_photo']; ?>;base64,<?php echo base64_encode($_SESSION['photo']); ?>" class="img-circle elevation-2" alt="User Image">
-                    <p>
-                        <?= $_SESSION['nom_prenom'] ?> - <?= $_SESSION['role'] ?>
-                    </p>
-                </li>
-                <li class="user-body">
-                    <div class="row">
-                        <div class="col-6 text-center">
-                            <a href="#" class="btn btn-default btn-flat">Profil</a>
-                        </div>
-                        <div class="col-6 text-center">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/utilisateur/deconnexion" class="btn btn-default btn-flat">Déconnexion</a>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </li>
-    </ul>
-=======
     <li class="nav-item dropdown user-menu">
         <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
             <img src="data:<?php echo $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?php echo base64_encode($_SESSION['photo'] ?? ''); ?>"
@@ -130,7 +85,6 @@ function old_url($path = '') {
     
 
 
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 </nav>
 
 <!-- ==================== SIDEBAR ==================== -->
@@ -197,7 +151,6 @@ function old_url($path = '') {
                                 <p>Enregistrement Réservations</p>
                             </a>
                         </li>
-<<<<<<< HEAD
                         <li class="nav-item">
                             <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/reservation/reservation_par_hotel" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
@@ -232,42 +185,6 @@ function old_url($path = '') {
                             <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/reservation/liste_reservation_facture" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Par facture</p>
-=======
-
-
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/reservation/reservation_par_hotel" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Details reservations</p>
-                            </a>
-                        </li>
-
-
- 
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/reservation/chambre_occupee_hotel" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Etats des chambres</p>
-                            </a>
-                        </li>
-
-
-
-          
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/reservation/liste_chambre_libre_hotel" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Listes par type</p>
-                            </a>
-                        </li>
-
-
-                       
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/reservation/liste_reservation_facture" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Factures reservations</p>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                             </a>
                         </li>
                     </ul>
@@ -286,20 +203,6 @@ function old_url($path = '') {
                                 <p>Enregistrement Clients</p>
                             </a>
                         </li>
-<<<<<<< HEAD
-=======
-
-
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/clients/liste" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Liste Clients</p>
-                            </a>
-                        </li>
-
-
-
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                     </ul>
                 </li>
 
@@ -368,7 +271,6 @@ function old_url($path = '') {
                         <li class="nav-item">
                             <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/transaction/transaction_facture" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-<<<<<<< HEAD
                                 <p>Par facture (période)</p>
                             </a>
                         </li>
@@ -402,29 +304,6 @@ function old_url($path = '') {
                                 <p>Solde clients</p>
                             </a>
                         </li>
-=======
-                                <p>Transactions globales</p>
-                            </a>
-                        </li>
-
-
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/transaction/solde_caisse" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Soldes</p>
-                            </a>
-                        </li>
-                       
-                        
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/transaction/rapport" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Rapports transactions</p>
-                            </a>
-                        </li>
-                        
-                       
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                     </ul>
                 </li>
 
@@ -457,19 +336,6 @@ function old_url($path = '') {
                                 <p>Enregistrement Hôtels</p>
                             </a>
                         </li>
-<<<<<<< HEAD
-=======
-
-                        <li class="nav-item">
-                            <a href="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/hotel/liste" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Liste Hôtels</p>
-                            </a>
-                        </li>
-
-
-
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                     </ul>
                 </li>
 

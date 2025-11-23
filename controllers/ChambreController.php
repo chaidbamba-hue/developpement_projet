@@ -46,8 +46,6 @@ if(!empty($_SESSION['role'])){ if ($_SESSION['role'] != 'Superviseur'  and $_SES
        include "views/chambres/liste-chambre.php";
     }
 
-<<<<<<< HEAD
-=======
 public function import() {
   
 
@@ -68,7 +66,6 @@ if(!empty($_SESSION['role'])){ if ($_SESSION['role'] != 'Superviseur'  and $_SES
 
         include "import/import_chambre.php";
     }
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
 }
 

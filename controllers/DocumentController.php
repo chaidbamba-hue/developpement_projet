@@ -65,8 +65,4 @@ class document
         return "$protocol://$host$dir";
     }
 }
-<<<<<<< HEAD
 ?>
-=======
-?>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919

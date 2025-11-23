@@ -25,8 +25,6 @@ if(!empty($_SESSION['role'])){ if ($_SESSION['role'] != 'Superviseur'  and $_SES
     }
 
 
-<<<<<<< HEAD
-=======
 public function imprimer_recu_reservation() {
   
 
@@ -48,7 +46,6 @@ if(!empty($_SESSION['role'])){ if ($_SESSION['role'] != 'Superviseur'  and $_SES
         include "views/reservations/imprimer_recu_reservation.php";
     }
 
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
 public function liste() {
   
@@ -94,12 +91,9 @@ if(!empty($_SESSION['role'])){ if ($_SESSION['role'] != 'Superviseur'  and $_SES
     }
 
 
-<<<<<<< HEAD
-=======
     
 
 
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
     public function reservation_par_chambre() {
   
 

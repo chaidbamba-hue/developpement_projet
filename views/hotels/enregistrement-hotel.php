@@ -11,8 +11,6 @@ if (isset($_GET['delete'])) {
     } catch (Exception $e) {
         $_SESSION['message'] = "Erreur lors de la suppression : impossible de supprimer un hôtel avec des chambres réservées.";
     }
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
 }
 
 // ==================== AJOUT / MODIFICATION ====================
@@ -101,15 +99,6 @@ sort($villes_cote_divoire);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<<<<<<< HEAD
-    <title>Hotelio | Hôtels</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
-</head>
-<body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
-    <?php include './config/dashboard.php'; ?>
-=======
     <title>Soutra+ | Gestion des Hôtels</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
@@ -124,14 +113,10 @@ sort($villes_cote_divoire);
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
     <?php include __DIR__ . '/../../config/dashboard.php'; ?>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
-<<<<<<< HEAD
-                <h1 class="mb-0">Hôtels (Triés par ordre alphabétique)</h1>
-=======
                 <div class="row mb-2">
                     <div class="col-sm-6"><h1>Gestion des Hôtels</h1></div>
                     <div class="col-sm-6">
@@ -141,13 +126,12 @@ sort($villes_cote_divoire);
                         </ol>
                     </div>
                 </div>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
             </div>
         </section>
 
         <section class="content">
             <div class="container-fluid">
-<<<<<<< HEAD
+
 
                 <!-- Boutons Export -->
                 <form method="post" class="d-flex justify-content-end mb-4 gap-2 flex-wrap">
@@ -162,28 +146,6 @@ sort($villes_cote_divoire);
                     </button>&nbsp &nbsp
                 </form>
 
-                <!-- Liste des hôtels (même style que les chambres) -->
-                <?php foreach ($hotels as $h): ?>
-                <div class="card mb-4 shadow-sm border-start border-primary border-5">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <?= htmlspecialchars($h['nom_hotel']) ?> 
-                            <small>(<?= htmlspecialchars($h['code_hotel']) ?>)</small>
-                        </h5>
-                        <span class="badge bg-light text-dark">
-                            <?= $h['nb_chambres'] ?> chambre<?= $h['nb_chambres'] > 1 ? 's' : '' ?>
-                        </span>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-=======
-<<<<<<< HEAD
-                
-                <!-- Message Flash -->
-=======
->>>>>>> 5cf037d595c4416fe2eed56b7720130cf8344b85
                 <?php if ($message): ?>
                     <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show">
                         <?= $message ?>
@@ -201,43 +163,10 @@ sort($villes_cote_divoire);
                         <div class="table-responsive">
                             <table class="table table-striped table-hover mb-0">
                                 <thead class="table-dark">
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                     <tr>
                                         <th>Code</th>
                                         <th>Nom</th>
                                         <th>Type</th>
-<<<<<<< HEAD
-                                        <th>Ville / Pays</th>
-                                        <th>Adresse Complète</th>
-                                        <th>Téléphone</th>
-                                        <th>Email</th>
-                                        <th>Chambres</th>
-                                        <th>État</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="text-center">
-                                        <td><strong><?= htmlspecialchars($h['code_hotel']) ?></strong></td>
-                                        <td><?= htmlspecialchars($h['nom_hotel']) ?></td>
-                                        <td><span class="badge bg-info text-dark"><?= htmlspecialchars($h['type_hotel']) ?></span></td>
-                                        <td>
-                                            <?= htmlspecialchars($h['ville_hotel']) ?><br>
-                                            <small class="text-muted"><?= htmlspecialchars($h['pays_hotel']) ?></small>
-                                        </td>
-                                        <td class="text-start">
-                                            <?= nl2br(htmlspecialchars($h['adresse_hotel'])) ?><br>
-                                            <small class="text-muted">Quartier : <?= htmlspecialchars($h['quartier_hotel']) ?></small>
-                                        </td>
-                                        <td><?= htmlspecialchars($h['telephone_hotel']) ?></td>
-                                        <td><?= htmlspecialchars($h['email_hotel'] ?? '-') ?></td>
-                                        <td><strong class="text-primary"><?= $h['nb_chambres'] ?></strong></td>
-                                        <td>
-                                            <span class="badge bg-<?= ($h['etat_hotel'] ?? '') == 'actif' ? 'success' : 'danger' ?>">
-                                                <?= ucfirst($h['etat_hotel'] ?? 'inconnu') ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-=======
                                         <th>Ville</th>
                                         <th>Téléphone</th>
                                         <th>État</th>
@@ -284,28 +213,11 @@ sort($villes_cote_divoire);
                                             </td>
                                         </tr>
                                     <?php endforeach; endif; ?>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-<<<<<<< HEAD
-                </div>
-                <?php endforeach; ?>
-
-                <?php if (empty($hotels)): ?>
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle fa-2x mb-3"></i><br>
-                        Aucun hôtel enregistré pour le moment.
-                    </div>
-                <?php endif; ?>
-
-            </div>
-        </section>
-    </div>
-</div>
-=======
             </div>
         </section>
     </div>
@@ -449,6 +361,5 @@ sort($villes_cote_divoire);
         });
     });
 </script>
->>>>>>> 24653d20902f480a272f396807e06cb4679ae919
 </body>
 </html>

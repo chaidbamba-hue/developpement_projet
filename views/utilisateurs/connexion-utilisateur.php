@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-box">
     <div class="card">
         <div class="card-header">
-            <img src="https://via.placeholder.com/80/007bff/ffffff?text=S+" alt="Logo">
+            <img src="<?php if(substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])),-1) =="/"){ echo (substr(((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"])), 0,-1)); }else{ echo ((isset($_SERVER["HTTPS"]) ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].dirname($_SERVER["PHP_SELF"]));} ?>/assets/logo.png" alt="Logo">
             <h4 class="mb-0"><b>Soutra</b>+</h4>
             <small>Gestion Hôtelière</small>
         </div>

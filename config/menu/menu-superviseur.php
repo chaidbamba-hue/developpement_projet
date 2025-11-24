@@ -126,6 +126,7 @@
             </div>
         </div>
     </div>
+    
 
     <!-- État des chambres en temps réel + Tâches urgentes -->
     <div class="row">

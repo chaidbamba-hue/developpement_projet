@@ -1,45 +1,50 @@
 <?php
-// === FONCTIONS POUR GÉRER LE MENU ACTIF ===
+// config/dashboard.php ou ton fichier d'inclusion
+$user_name = "Jean Dupont";
+$user_role = "Administrateur";
+$user_photo = "https://via.placeholder.com/160x160/007bff/ffffff?text=JD";
+
+// Fonction old_url améliorée et simplifiée
 function old_url($path = '') {
     $base = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== 'off' ? 'https://' : 'http://') . 
-            $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER["PHP_SELF"]), '/');
+            $_SERVER['HTTP_HOST'] . 
+            rtrim(dirname($_SERVER["PHP_SELF"]), '/\\');
     return $base . '/' . ltrim($path, '/');
 }
 
-// Vérifie si le chemin correspond à la page actuelle
+// Fonction pour détecter la page active
 function isActive($path) {
     $current = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $path    = '/' . trim($path, '/');
-    $path    = rtrim($path, '/') . '/';
+    $path = '/' . trim($path, '/');
     $current = rtrim($current, '/') . '/';
+    $path = rtrim($path, '/') . '/';
     return strpos($current, $path) !== false;
 }
 
-// Retourne la classe "100" si actif
-function activeClass($path, $return = 'active') {
-    return isActive($path) ? $return : '';
+function activeClass($path, $class = 'active') {
+    return isActive($path) ? $class : '';
 }
 ?>
 
-<!-- ==================== NAVBAR (inchangée) ==================== -->
+<!-- ==================== NAVBAR ==================== -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0 shadow-sm">
     <ul class="navbar-nav">
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="index.php" class="nav-link fw-semibold">Accueil</a>
+            <a href="<?= old_url('index.php') ?>" class="nav-link fw-semibold">Accueil</a>
         </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
-                <img src="data:<?php echo $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?php echo base64_encode($_SESSION['photo'] ?? ''); ?>"
+                <img src="data:<?= $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?= base64_encode($_SESSION['photo'] ?? '') ?>"
                      class="user-image img-circle elevation-2 border border-white"
                      alt="User Image"
                      style="width: 38px; height: 38px; object-fit: cover;">
-                <span class="d-none d-md-inline ms-2 fw-semibold"><?= htmlspecialchars($_SESSION['nom_prenom'] ?? 'Utilisateur'); ?></span>
+                <span class="d-none d-md-inline ms-2 fw-semibold"><?= htmlspecialchars($_SESSION['nom_prenom'] ?? 'Utilisateur') ?></span>
                 <i class="fas fa-chevron-down ms-1 text-muted small d-none d-lg-inline"></i>
             </a>
 
@@ -47,15 +52,15 @@ function activeClass($path, $return = 'active') {
                 <li class="user-header bg-primary position-relative overflow-hidden" style="border-radius: 16px 16px 0 0; padding: 2.5rem 1.5rem;">
                     <div class="text-center">
                         <div class="position-relative d-inline-block">
-                            <img src="data:<?php echo $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?php echo base64_encode($_SESSION['photo'] ?? ''); ?>"
+                            <img src="data:<?= $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?= base64_encode($_SESSION['photo'] ?? '') ?>"
                                  class="img-circle elevation-4 border border-white border-4"
                                  alt="User Avatar"
                                  style="width: 90px; height: 90px; object-fit: cover;">
-                            <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-white" 
+                            <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-white"
                                  style="width: 26px; height: 26px; box-shadow: 0 0 0 4px rgba(40,167,69,0.3);"></div>
                         </div>
-                        <p class="text-white mt-3 mb-1 fw-bold fs-5"><?= htmlspecialchars($_SESSION['nom_prenom'] ?? 'Utilisateur'); ?></p>
-                        <p class="text-white opacity-90 mb-0"><small><?= htmlspecialchars($_SESSION['role'] ?? 'Membre'); ?></small></p>
+                        <p class="text-white mt-3 mb-1 fw-bold fs-5"><?= htmlspecialchars($_SESSION['nom_prenom'] ?? 'Utilisateur') ?></p>
+                        <p class="text-white opacity-90 mb-0"><small><?= htmlspecialchars($_SESSION['role'] ?? 'Membre') ?></small></p>
                     </div>
                 </li>
 
@@ -68,8 +73,7 @@ function activeClass($path, $return = 'active') {
                             <i class="fas fa-cog text-muted me-3"></i> Paramètres
                         </a>
                         <hr class="my-2">
-                        <a href="<?= old_url('/utilisateur/deconnexion') ?>" 
-                           class="btn btn-danger btn-block text-white fw-bold mt-2">
+                        <a href="<?= old_url('/utilisateur/deconnexion') ?>" class="btn btn-danger btn-block text-white fw-bold mt-2">
                             <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
                         </a>
                     </div>
@@ -84,14 +88,14 @@ function activeClass($path, $return = 'active') {
 
 <!-- ==================== SIDEBAR ==================== -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="index.php" class="brand-link text-center py-3">
+    <a href="<?= old_url('index.php') ?>" class="brand-link text-center py-3">
         <span class="brand-text font-weight-light fw-bold">Soutra+</span>
     </a>
 
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="data:<?php echo $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?php echo base64_encode($_SESSION['photo'] ?? ''); ?>" 
+                <img src="data:<?= $_SESSION['type_photo'] ?? 'image/jpeg'; ?>;base64,<?= base64_encode($_SESSION['photo'] ?? '') ?>"
                      class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
@@ -100,14 +104,12 @@ function activeClass($path, $return = 'active') {
             </div>
         </div>
 
-        <!-- ==================== MENU PRINCIPAL ==================== -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
                 <!-- TABLEAU DE BORD -->
                 <li class="nav-item">
-                    <a href="<?= old_url('/utilisateur/dashboard') ?>" 
-                       class="nav-link <?= activeClass('/utilisateur/dashboard') ?>">
+                    <a href="<?= old_url('/utilisateur/dashboard') ?>" class="nav-link <?= activeClass('/utilisateur/dashboard') ?>">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Tableau de bord</p>
                     </a>
@@ -121,17 +123,13 @@ function activeClass($path, $return = 'active') {
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="<?= old_url('/chambre/enregistrement') ?>" 
-                               class="nav-link <?= activeClass('/chambre/enregistrement') ?>">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Enregistrement Chambres</p>
+                            <a href="<?= old_url('/chambre/enregistrement') ?>" class="nav-link <?= activeClass('/chambre/enregistrement') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Enregistrement Chambres</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= old_url('/chambre/liste') ?>" 
-                               class="nav-link <?= activeClass('/chambre/liste') ?>">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Liste des Chambres</p>
+                            <a href="<?= old_url('/chambre/liste') ?>" class="nav-link <?= activeClass('/chambre/liste') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Liste des Chambres</p>
                             </a>
                         </li>
                     </ul>
@@ -151,32 +149,22 @@ function activeClass($path, $return = 'active') {
                         </li>
                         <li class="nav-item">
                             <a href="<?= old_url('/reservation/reservation_par_hotel') ?>" class="nav-link <?= activeClass('/reservation/reservation_par_hotel') ?>">
-                                <i class="far fa-circle nav-icon"></i><p>Par hôtel (période)</p>
+                                <i class="far fa-circle nav-icon"></i><p>Détails réservations</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= old_url('/reservation/reservation_par_chambre') ?>" class="nav-link <?= activeClass('/reservation/reservation_par_chambre') ?>">
-                                <i class="far fa-circle nav-icon"></i><p>Par chambre (période)</p>
+                            <a href="<?= old_url('/reservation/chambre_occupee_hotel') ?>" class="nav-link <?= activeClass('/reservation/chambre_occupee_hotel') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>États des chambres</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= old_url('/reservation/chambre_occupee_periode') ?>" class="nav-link <?= activeClass('/reservation/chambre_occupee_periode') ?>">
-                                <i class="far fa-circle nav-icon"></i><p>Chambres occupées (période)</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="<?= old_url('/reservation/chambre_reservee_periode') ?>" class="nav-link <?= activeClass('/reservation/chambre_reservee_periode') ?>">
-                                <i class="far fa-circle nav-icon"></i><p>Chambres réservées (période)</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="<?= old_url('/reservation/liste_chambre_libre_periode') ?>" class="nav-link <?= activeClass('/reservation/liste_chambre_libre_periode') ?>">
-                                <i class="far fa-circle nav-icon"></i><p>Chambres libres (période)</p>
+                            <a href="<?= old_url('/reservation/liste_chambre_libre_hotel') ?>" class="nav-link <?= activeClass('/reservation/liste_chambre_libre_hotel') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Listes par type</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="<?= old_url('/reservation/liste_reservation_facture') ?>" class="nav-link <?= activeClass('/reservation/liste_reservation_facture') ?>">
-                                <i class="far fa-circle nav-icon"></i><p>Par facture</p>
+                                <i class="far fa-circle nav-icon"></i><p>Factures réservations</p>
                             </a>
                         </li>
                     </ul>
@@ -192,6 +180,11 @@ function activeClass($path, $return = 'active') {
                         <li class="nav-item">
                             <a href="<?= old_url('/clients/enregistrement') ?>" class="nav-link <?= activeClass('/clients/enregistrement') ?>">
                                 <i class="far fa-circle nav-icon"></i><p>Enregistrement Clients</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= old_url('/clients/liste') ?>" class="nav-link <?= activeClass('/clients/liste') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Liste Clients</p>
                             </a>
                         </li>
                     </ul>
@@ -228,8 +221,8 @@ function activeClass($path, $return = 'active') {
                 </li>
 
                 <!-- UTILISATEURS -->
-                <li class="nav-item <?= activeClass('/utilisateur/') && !isActive('/utilisateur/dashboard') && !isActive('/utilisateur/deconnexion') ? 'menu-open' : '' ?>">
-                    <a href="#" class="nav-link <?= activeClass('/utilisateur/') && !isActive('/utilisateur/dashboard') && !isActive('/utilisateur/deconnexion') ? 'active' : '' ?>">
+                <li class="nav-item <?= (activeClass('/utilisateur/') && !isActive('/utilisateur/dashboard') && !isActive('/utilisateur/deconnexion')) ? 'menu-open' : '' ?>">
+                    <a href="#" class="nav-link <?= (activeClass('/utilisateur/') && !isActive('/utilisateur/dashboard') && !isActive('/utilisateur/deconnexion')) ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Utilisateurs <i class="right fas fa-angle-left"></i></p>
                     </a>
@@ -249,13 +242,26 @@ function activeClass($path, $return = 'active') {
                         <p>Transactions <i class="right fas fa-angle-left"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item"><a href="<?= old_url('/transaction/enregistrement') ?>" class="nav-link <?= activeClass('/transaction/enregistrement') ?>"><i class="far fa-circle nav-icon"></i><p>Enregistrement Transactions</p></a></li>
-                        <li class="nav-item"><a href="<?= old_url('/transaction/transaction_facture') ?>" class="nav-link <?= activeClass('/transaction/transaction_facture') ?>"><i class="far fa-circle nav-icon"></i><p>Par facture (période)</p></a></li>
-                        <li class="nav-item"><a href="<?= old_url('/transaction/transaction_type') ?>" class="nav-link <?= activeClass('/transaction/transaction_type') ?>"><i class="far fa-circle nav-icon"></i><p>Par type (période)</p></a></li>
-                        <li class="nav-item"><a href="<?= old_url('/transaction/impression') ?>" class="nav-link <?= activeClass('/transaction/impression') ?>"><i class="far fa-circle nav-icon"></i><p>Impression reçu</p></a></li>
-                        <li class="nav-item"><a href="<?= old_url('/transaction/rapport') ?>" class="nav-link <?= activeClass('/transaction/rapport') ?>"><i class="far fa-circle nav-icon"></i><p>Reporting</p></a></li>
-                        <li class="nav-item"><a href="<?= old_url('/transaction/solde_caisse') ?>" class="nav-link <?= activeClass('/transaction/solde_caisse') ?>"><i class="far fa-circle nav-icon"></i><p>Solde caisse</p></a></li>
-                        <li class="nav-item"><a href="<?= old_url('/transaction/solde_client') ?>" class="nav-link <?= activeClass('/transaction/solde_client') ?>"><i class="far fa-circle nav-icon"></i><p>Solde clients</p></a></li>
+                        <li class="nav-item">
+                            <a href="<?= old_url('/transaction/enregistrement') ?>" class="nav-link <?= activeClass('/transaction/enregistrement') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Enregistrement Transactions</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= old_url('/transaction/transaction_facture') ?>" class="nav-link <?= activeClass('/transaction/transaction_facture') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Transactions globales</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= old_url('/transaction/solde_caisse') ?>" class="nav-link <?= activeClass('/transaction/solde_caisse') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Soldes</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= old_url('/transaction/rapport') ?>" class="nav-link <?= activeClass('/transaction/rapport') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Rapports transactions</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -286,11 +292,16 @@ function activeClass($path, $return = 'active') {
                                 <i class="far fa-circle nav-icon"></i><p>Enregistrement Hôtels</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="<?= old_url('/hotel/liste') ?>" class="nav-link <?= activeClass('/hotel/liste') ?>">
+                                <i class="far fa-circle nav-icon"></i><p>Liste Hôtels</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
                 <!-- PARAMÈTRES -->
-                <li class="nav-header text-uppercase">Paramètres</li>
+                <li class="nav-header text-uppercase text-warning">Paramètres</li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-cog"></i>
